@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Bearing Capacity Calculator | EngCalc.app</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- 1. VARIABLES & THEMES --- */
+        :root {
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #0f172a;   
+            --text-muted: #475569;
+            --brand-navy: #0f172a; 
+            --brand-blue: #2563eb; 
+            --brand-blue-light: rgba(37, 99, 235, 0.1);
+            --border-color: #e2e8f0;
+            --logo-text: #000000;
+            --logo-dot: #2563eb;
+            --grid-color: rgba(15, 23, 42, 0.05);
+            --status-success-bg: #dcfce7;
+            --status-success-text: #166534;
+            --badge-bg: #e2e8f0;
+            --badge-text: #475569;
+
+            /* Diagram Colors */
+            --dim-color: #475569;
+            --water-color: #3b82f6;
+            --concrete-grad-start: #f1f5f9;
+            --concrete-grad-end: #cbd5e1;
+            --soil-top: #f8fafc;
+            --soil-bot: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #020617;        
+            --bg-surface: #0f172a; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --brand-navy: #ffffff;
+            --brand-blue: #60a5fa;
+            --brand-blue-light: rgba(96, 165, 250, 0.15);
+            --border-color: #1e293b;
+            --logo-text: #ffffff;
+            --logo-dot: #60a5fa;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --status-success-bg: #064e3b; 
+            --status-success-text: #6ee7b7;
+            --badge-bg: #1e293b;
+            --badge-text: #94a3b8;
+
+            /* Diagram Colors (Dark) */
+            --dim-color: #cbd5e0;
+            --water-color: #60a5fa;
+            --concrete-grad-start: #1e293b;
+            --concrete-grad-end: #0f172a;
+            --soil-top: #0f172a;
+            --soil-bot: #020617;
+        }
+
+        /* --- 2. RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { transition: background-color 0s, color 0s, border-color 0s; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+        /* --- 3. NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+        [data-theme="dark"] nav { background: rgba(2, 6, 23, 0.7); }
+
+        .nav-group { display: flex; align-items: center; gap: 3rem; }
+        .logo { font-family: 'Cairo Play', sans-serif; font-size: 1.6rem; font-weight: 700; display: flex; align-items: baseline; }
+        .logo-main { color: var(--logo-text); }
+        .logo-app { color: var(--logo-dot); }
+
+        .back-link { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
+        .back-link:hover { color: var(--brand-blue); }
+
+        .nav-actions { display: flex; gap: 0.5rem; }
+        .icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border-color); color: var(--text-main); display: flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background-color: var(--brand-blue); color: white; border-color: var(--brand-blue); }
+
+        /* --- 4. MAIN LAYOUT --- */
+        main {
+            padding: 8rem 5% 4rem; 
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+        }
+
+        .page-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+        .badges-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .badge { font-size: 0.75rem; background: var(--badge-bg); color: var(--badge-text); padding: 4px 10px; border-radius: 6px; font-weight: 600; }
+        .badge-success { background-color: var(--status-success-bg); color: var(--status-success-text); }
+
+        h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); color: var(--brand-navy); font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        .citation { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
+
+        /* --- CALCULATOR LAYOUT --- */
+        .calc-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: stretch;
+        }
+
+        .input-card, .diagram-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex; flex-direction: column;
+        }
+        .input-card { padding: 1.5rem; }
+        .diagram-card { padding: 0; min-height: 400px; overflow: hidden; position: relative; justify-content: center; align-items: center; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn {
+            background: none; border: none; font-size: 0.95rem; font-weight: 600; color: var(--text-muted); 
+            padding: 8px 12px; cursor: pointer; border-radius: 6px; transition: all 0.2s; font-family: inherit;
+        }
+        .tab-btn.active { background-color: var(--brand-blue-light); color: var(--brand-blue); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main); }
+        .form-input, .form-select {
+            width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; 
+            background: var(--bg-body); color: var(--text-main); font-size: 0.95rem; font-family: inherit;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--brand-blue); outline: none; box-shadow: 0 0 0 3px var(--brand-blue-light); }
+
+        /* Buttons & Actions */
+        .calc-actions { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 1rem; 
+            margin-top: 2rem; 
+            flex-wrap: wrap;
+        }
+        
+        .btn-calc {
+            padding: 1rem 3rem; font-size: 1.1rem; font-weight: 700; background-color: var(--brand-blue); 
+            color: white; border: none; border-radius: 50px; cursor: pointer; transition: opacity 0.2s;
+        }
+        .btn-calc:hover { opacity: 0.9; }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-main);
+            display: inline-flex; align-items: center; gap: 8px;
+            /* Initially hidden */
+            display: none; 
+        }
+        .btn-secondary:hover {
+            border-color: var(--brand-blue);
+            color: var(--brand-blue);
+        }
+
+        /* Results Section */
+        .results-section { display: none; margin-top: 3rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 2.5rem; }
+        .result-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700; color: var(--brand-navy); }
+        
+        .step-box { margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-body); border-radius: 8px; border: 1px solid var(--border-color); overflow-x: auto; }
+        .step-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--brand-blue); }
+        .step-note { margin-top:15px; padding: 10px; background-color: var(--brand-blue-light); border-radius: 6px; font-size: 0.9rem; font-style: italic; border-left: 3px solid var(--brand-blue); }
+        
+        .final-answer { 
+            text-align: center; padding: 2rem; 
+            background: var(--status-success-bg); color: var(--status-success-text); 
+            border: 1px solid var(--border-color); border-radius: 12px; margin-top: 2rem; 
+        }
+
+        /* Footer inside results for PDF button */
+        .result-actions { margin-top: 2rem; text-align: center; }
+
+        /* SVG Styles */
+        svg { width: 100%; height: 100%; display: block; }
+        svg text { font-family: 'Plus Jakarta Sans', sans-serif; fill: var(--text-main); font-weight: 500; }
+        .svg-foundation { fill: url(#concreteGradient); stroke: var(--dim-color); stroke-width: 1.5; }
+        .svg-soil-bg { fill: url(#soilGradient); }
+        .svg-dim-line { stroke: var(--dim-color); stroke-width: 1; }
+        .svg-label { font-size: 13px; font-weight: 600; fill: var(--dim-color); }
+        .svg-props-box { fill: var(--bg-body); stroke: var(--border-color); stroke-width: 1; rx: 4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+        .svg-water-line { stroke: var(--water-color); stroke-width: 2; stroke-dasharray: 6,4; }
+        .svg-water-fill { fill: var(--water-color); opacity: 0.1; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 900px) {
+            .calc-layout { grid-template-columns: 1fr; }
+            main { padding-top: 6rem; padding-left: 1rem; padding-right: 1rem; }
+            .diagram-card { min-height: 350px; }
+        }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border-color); text-align: center; background: var(--bg-body); padding: 4rem 5%; margin-top: auto; }
+        .footer-logo { margin-bottom: 1rem; justify-content: center; }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* --- 5. PRINT / PDF OPTIMIZATION (1 PAGE FIT) --- */
+        @media print {
+            body { 
+                background: white !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                transform: scale(0.75); /* SCALES CONTENT TO FIT 1 PAGE */
+                transform-origin: top center;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            
+            nav, footer, .nav-actions, .back-link, .tabs, .print-btn-trigger, .calc-actions { 
+                display: none !important; 
+            }
+            
+            main { padding: 20px 40px !important; margin: 0 auto !important; max-width: 100% !important; }
+            .page-header { border: none !important; margin-bottom: 5px !important; padding-bottom: 0 !important; }
+            h1 { font-size: 1.8rem !important; margin-bottom: 5px !important; }
+            
+            .calc-layout { 
+                display: grid !important; 
+                grid-template-columns: 35% 60% !important; 
+                gap: 20px !important; 
+                margin-bottom: 10px !important;
+            }
+            
+            .input-card, .diagram-card { 
+                box-shadow: none !important; 
+                border: 1px solid #ddd !important;
+                padding: 10px !important;
+                min-height: 250px !important;
+            }
+
+            .tab-content { display: block !important; }
+            .form-group { margin-bottom: 5px !important; }
+            .form-input, .form-select { border: none !important; padding: 0 !important; font-weight: bold; background: none !important; }
+            label { font-size: 0.8rem !important; color: #666; }
+
+            .results-section { 
+                display: block !important; 
+                margin-top: 10px !important; 
+                box-shadow: none !important; 
+                border: 1px solid #ddd !important; 
+                padding: 10px !important; 
+            }
+            .step-box { padding: 5px !important; margin-bottom: 5px !important; background: none !important; border: 1px solid #eee !important; }
+            .final-answer { padding: 10px !important; margin-top: 5px !important; }
+            
+            .step-box, .final-answer, .input-card, .diagram-card { page-break-inside: avoid !important; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav>
+        <div class="nav-group">
+            <a href="#" class="logo">
+                <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+            </a>
+            <a href="#" class="back-link"><i class="fa-solid fa-arrow-left"></i> Hub</a>
+        </div>
+
+        <div class="nav-actions">
+            <button class="icon-btn" id="themeToggle" aria-label="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="accessToggle" aria-label="Toggle Accessibility Mode"><i class="fa-solid fa-eye"></i></button>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        
+        <div class="page-header">
+            <div class="badges-row">
+                <span class="badge">ID: GEO-1</span>
+                <span class="badge">Method: Terzaghi (1943)</span>
+                <span class="badge">Author: Anas Al Fulaiti</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: James W. (12/JAN/2026)</span>
+            </div>
+            <h1>Bearing Capacity Calculator</h1>
+            <p class="citation">Calculate ultimate and allowable bearing capacity for shallow foundations.</p>
+        </div>
+
+        <div class="calc-layout">
+            
+            <div class="input-card">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab('soil')">Soil Properties</button>
+                    <button class="tab-btn" onclick="openTab('geometry')">Geometry</button>
+                    <button class="tab-btn" onclick="openTab('loads')">FoS</button>
+                </div>
+
+                <div id="soil" class="tab-content active">
+                    <div class="form-group">
+                        <label class="form-label">Cohesion, $c'$ (kPa)</label>
+                        <input type="number" id="input_c" class="form-input" value="5" oninput="updateDiagram()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Friction Angle, $\phi'$ (degrees)</label>
+                        <input type="number" id="input_phi" class="form-input" value="30" oninput="updateDiagram()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Unit Weight, $\gamma$ (kN/m³)</label>
+                        <input type="number" id="input_gamma" class="form-input" value="18" oninput="updateDiagram()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Groundwater Depth, $D_w$ (m)</label>
+                        <input type="number" id="input_Dw" class="form-input" value="2.0" oninput="updateDiagram()">
+                    </div>
+                </div>
+
+                <div id="geometry" class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Foundation Shape</label>
+                        <select id="input_shape" class="form-select" onchange="updateDiagram()">
+                            <option value="square">Square</option>
+                            <option value="circular" selected>Circular</option>
+                            <option value="strip">Strip (Continuous)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Width / Diameter, $B$ (m)</label>
+                        <input type="number" id="input_B" class="form-input" value="2.0" oninput="updateDiagram()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Depth of Embedment, $D_f$ (m)</label>
+                        <input type="number" id="input_Df" class="form-input" value="1.0" oninput="updateDiagram()">
+                    </div>
+                </div>
+
+                <div id="loads" class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Factor of Safety (FoS)</label>
+                        <input type="number" id="input_FS" class="form-input" value="3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagram-card" id="diagram-container">
+                <svg width="100%" height="100%" viewBox="0 0 500 400" id="paramDiagram" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <linearGradient id="concreteGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--concrete-grad-start);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:var(--concrete-grad-end);stop-opacity:1" />
+                        </linearGradient>
+                        
+                        <linearGradient id="soilGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--soil-top);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:var(--soil-bot);stop-opacity:1" />
+                        </linearGradient>
+
+                        <pattern id="hatchPattern" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+                            <line x1="0" y1="0" x2="0" y2="10" stroke="var(--text-muted)" stroke-width="1" opacity="0.3"/>
+                        </pattern>
+                    </defs>
+
+                    <rect x="0" y="0" width="500" height="400" fill="var(--bg-surface)" />
+
+                    <rect x="0" y="50" width="500" height="350" class="svg-soil-bg" id="svg_soil_rect" />
+                    <rect x="0" y="50" width="500" height="350" fill="url(#hatchPattern)" />
+
+                    <line x1="0" y1="50" x2="500" y2="50" stroke="var(--text-main)" stroke-width="2"/>
+                    <text x="490" y="40" text-anchor="end" font-size="12" font-style="italic">Ground Surface</text>
+
+                    <rect id="svg_water_fill" x="0" y="0" width="500" height="0" class="svg-water-fill" />
+
+                    <g id="svg_foundation_group">
+                        <rect id="svg_col" x="225" y="50" width="50" height="100" class="svg-foundation" />
+                        <rect id="svg_base" x="150" y="150" width="200" height="40" class="svg-foundation" />
+                        <line id="svg_centerline" x1="250" y1="30" x2="250" y2="250" stroke="var(--dim-color)" stroke-width="1" stroke-dasharray="8,4" opacity="0.4"/>
+                    </g>
+                    
+                    <g id="svg_gwt_group">
+                        <line x1="0" y1="0" x2="500" y2="0" class="svg-water-line" />
+                        <polygon points="-6,-10 6,-10 0,0" fill="var(--water-color)" transform="translate(60,0)"/> 
+                        <text x="70" y="-5" fill="var(--water-color)" font-size="12" font-weight="bold">GWT</text>
+                    </g>
+
+                    <g id="svg_dim_Df">
+                        <line class="svg-dim-line" />
+                        <line class="svg-dim-line" />
+                        <line class="svg-dim-line" />
+                        <text class="svg-label" text-anchor="end"></text>
+                    </g>
+
+                    <g id="svg_dim_Dw">
+                        <line class="svg-dim-line" stroke="var(--water-color)" />
+                        <line class="svg-dim-line" stroke="var(--water-color)" />
+                        <line class="svg-dim-line" stroke="var(--water-color)" />
+                        <text class="svg-label" text-anchor="end" fill="var(--water-color)"></text>
+                    </g>
+
+                    <g id="svg_dim_B">
+                        <line class="svg-dim-line" />
+                        <line class="svg-dim-line" />
+                        <line class="svg-dim-line" />
+                        <text class="svg-label" text-anchor="middle"></text>
+                    </g>
+
+                    <text x="250" y="175" text-anchor="middle" font-size="12" id="svg_shape_text" style="pointer-events: none;">Circular</text>
+
+                    <rect x="340" y="60" width="150" height="120" class="svg-props-box" fill-opacity="0.95"/>
+                    <text x="350" y="80" font-size="12" font-weight="bold">Input Data</text>
+                    <text x="350" y="100" font-size="11" id="svg_c"></text>
+                    <text x="350" y="120" font-size="11" id="svg_phi"></text>
+                    <text x="350" y="140" font-size="11" id="svg_gamma"></text>
+                    <text x="350" y="160" font-size="11" id="svg_Dw_text_box" fill="var(--water-color)"></text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="calc-actions">
+            <button class="btn-calc" onclick="calculate()">Calculate Result</button>
+            <button class="btn-calc btn-secondary print-btn-trigger" style="display: none;">
+                <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </button>
+        </div>
+
+        <div id="results" class="results-section">
+            <div class="result-header">Calculation Results</div>
+            <div id="calculation-steps"></div>
+            
+            <div class="result-actions">
+                <button class="btn-calc btn-secondary print-btn-trigger" style="display: none;">
+                    <i class="fa-solid fa-file-pdf"></i> Download Result as PDF
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="logo footer-logo">
+            <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+        </div>
+        <p class="footer-text">&copy; 2026 EngCalc.app. Built for the Civil Engineering Community.</p>
+    </footer>
+
+    <script>
+        // --- 1. THEME & ACCESS TOGGLES ---
+        const themeBtn = document.getElementById('themeToggle');
+        const accessBtn = document.getElementById('accessToggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+            themeBtn.innerHTML = savedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+            updateDiagram(); // Redraw chart colors
+        });
+
+        accessBtn.addEventListener('click', () => {
+            const isBlind = body.getAttribute('data-accessibility') === 'blind';
+            if(isBlind) {
+                body.removeAttribute('data-accessibility');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            } else {
+                body.setAttribute('data-accessibility', 'blind');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            }
+        });
+
+        // --- 2. CALCULATOR LOGIC ---
+        function openTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            const btns = document.querySelectorAll('.tab-btn');
+            contents.forEach(c => c.classList.remove('active'));
+            btns.forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function updateDiagram() {
+            const B_val = parseFloat(document.getElementById('input_B').value) || 0;
+            const Df_val = parseFloat(document.getElementById('input_Df').value) || 0;
+            const Dw_val = parseFloat(document.getElementById('input_Dw').value) || 0;
+            const shape = document.getElementById('input_shape').value;
+            const groundY = 50;
+            let ppm = 50; 
+            if (B_val > 5 || Df_val > 5) ppm = 30; 
+            if (B_val < 1 && Df_val < 1) ppm = 100;
+            const pixB = Math.max(B_val * ppm, 40); 
+            const pixDf = Math.max(Df_val * ppm, 0); 
+            const pixDw = Dw_val * ppm;
+            const centerX = 250;
+            const footingThickness = 40;
+            const footingBaseY = groundY + pixDf;
+            const footingTopY = footingBaseY - footingThickness;
+            const colWidth = pixB * 0.25; 
+            
+            const col = document.getElementById('svg_col');
+            col.setAttribute('x', centerX - colWidth/2);
+            col.setAttribute('y', groundY - 20); 
+            col.setAttribute('width', colWidth);
+            col.setAttribute('height', (footingTopY - (groundY - 20))); 
+            
+            const base = document.getElementById('svg_base');
+            base.setAttribute('x', centerX - pixB/2);
+            base.setAttribute('y', footingTopY);
+            base.setAttribute('width', pixB);
+            base.setAttribute('height', footingThickness);
+            
+            document.getElementById('svg_shape_text').textContent = shape.charAt(0).toUpperCase() + shape.slice(1);
+            document.getElementById('svg_shape_text').setAttribute('y', footingBaseY - 15);
+
+            const dimX_Df = centerX - pixB/2 - 30;
+            const groupDf = document.getElementById('svg_dim_Df').children;
+            groupDf[0].setAttribute('x1', dimX_Df); groupDf[0].setAttribute('x2', dimX_Df);
+            groupDf[0].setAttribute('y1', groundY); groupDf[0].setAttribute('y2', footingBaseY);
+            groupDf[1].setAttribute('x1', dimX_Df-5); groupDf[1].setAttribute('x2', dimX_Df+5);
+            groupDf[1].setAttribute('y1', groundY); groupDf[1].setAttribute('y2', groundY);
+            groupDf[2].setAttribute('x1', dimX_Df-5); groupDf[2].setAttribute('x2', dimX_Df+5);
+            groupDf[2].setAttribute('y1', footingBaseY); groupDf[2].setAttribute('y2', footingBaseY);
+            const textDf = groupDf[3];
+            textDf.setAttribute('x', dimX_Df - 10);
+            textDf.setAttribute('y', groundY + (pixDf > 0 ? pixDf/2 : 10));
+            textDf.textContent = `Df = ${Df_val} m`;
+
+            const dimX_Dw = dimX_Df - 80; 
+            const waterY = groundY + pixDw;
+            const clampedWaterY = Math.min(Math.max(waterY, groundY), 390);
+            const groupDw = document.getElementById('svg_dim_Dw').children;
+            groupDw[0].setAttribute('x1', dimX_Dw); groupDw[0].setAttribute('x2', dimX_Dw);
+            groupDw[0].setAttribute('y1', groundY); groupDw[0].setAttribute('y2', clampedWaterY);
+            groupDw[1].setAttribute('x1', dimX_Dw-5); groupDw[1].setAttribute('x2', dimX_Dw+5);
+            groupDw[1].setAttribute('y1', groundY); groupDw[1].setAttribute('y2', groundY);
+            groupDw[2].setAttribute('x1', dimX_Dw-5); groupDw[2].setAttribute('x2', dimX_Dw+5);
+            groupDw[2].setAttribute('y1', clampedWaterY); groupDw[2].setAttribute('y2', clampedWaterY);
+            const textDw = groupDw[3];
+            textDw.setAttribute('x', dimX_Dw - 10);
+            textDw.setAttribute('y', groundY + (clampedWaterY - groundY)/2 + 5);
+            textDw.textContent = `Dw = ${Dw_val} m`;
+
+            const dimY_B = footingBaseY + 30;
+            const groupB = document.getElementById('svg_dim_B').children;
+            groupB[0].setAttribute('x1', centerX - pixB/2); groupB[0].setAttribute('x2', centerX + pixB/2);
+            groupB[0].setAttribute('y1', dimY_B); groupB[0].setAttribute('y2', dimY_B);
+            groupB[1].setAttribute('x1', centerX - pixB/2); groupB[1].setAttribute('x2', centerX - pixB/2);
+            groupB[1].setAttribute('y1', dimY_B - 5); groupB[1].setAttribute('y2', dimY_B + 5);
+            groupB[2].setAttribute('x1', centerX + pixB/2); groupB[2].setAttribute('x2', centerX + pixB/2);
+            groupB[2].setAttribute('y1', dimY_B - 5); groupB[2].setAttribute('y2', dimY_B + 5);
+            const textB = groupB[3];
+            textB.setAttribute('x', centerX);
+            textB.setAttribute('y', dimY_B + 20);
+            textB.textContent = `B = ${B_val} m`;
+
+            document.getElementById('svg_gwt_group').setAttribute('transform', `translate(0, ${clampedWaterY})`);
+            const waterFill = document.getElementById('svg_water_fill');
+            waterFill.setAttribute('y', clampedWaterY);
+            waterFill.setAttribute('height', 400 - clampedWaterY);
+
+            document.getElementById('svg_c').textContent = `c = ${document.getElementById('input_c').value} kPa`;
+            document.getElementById('svg_phi').textContent = `φ = ${document.getElementById('input_phi').value}°`;
+            document.getElementById('svg_gamma').textContent = `γ = ${document.getElementById('input_gamma').value} kN/m³`;
+            document.getElementById('svg_Dw_text_box').textContent = `Dw = ${Dw_val} m`;
+        }
+
+        function calculate() {
+            const c = parseFloat(document.getElementById('input_c').value);
+            const phi = parseFloat(document.getElementById('input_phi').value);
+            const gamma = parseFloat(document.getElementById('input_gamma').value);
+            const B = parseFloat(document.getElementById('input_B').value);
+            const Df = parseFloat(document.getElementById('input_Df').value);
+            const Dw = parseFloat(document.getElementById('input_Dw').value);
+            const FS = parseFloat(document.getElementById('input_FS').value);
+            const shape = document.getElementById('input_shape').value;
+            const gamma_w = 9.81; 
+
+            // 1. Surcharge Calculation with Explicit Variables
+            let q_surcharge = 0, q_calc_text = "", q_explanation = "";
+            const gamma_prime = gamma - gamma_w;
+            
+            if (Dw >= Df) {
+                q_surcharge = gamma * Df;
+                q_explanation = `Condition: $D_w (${Dw}) \\ge D_f (${Df})$. Effective stress not reduced.`;
+                q_calc_text = `q = \\gamma \\times D_f = ${gamma} \\times ${Df} = ${q_surcharge.toFixed(2)}`;
+            } else {
+                q_surcharge = (gamma * Dw) + (gamma_prime * (Df - Dw));
+                q_explanation = `Condition: $D_w (${Dw}) < D_f (${Df})$. Submerged unit weight below water.`;
+                q_calc_text = `q = (\\gamma \\cdot D_w) + (\\gamma' \\cdot (D_f - D_w)) = (${gamma} \\cdot ${Dw}) + (${gamma_prime.toFixed(2)} \\cdot ${parseFloat(Df-Dw).toFixed(2)}) = ${q_surcharge.toFixed(2)}`;
+            }
+
+            // 2. Unit Weight Correction with Explicit Variables
+            let gamma_star = gamma, gamma_calc_text = "", gamma_explanation = "";
+            const failureDepth = Df + B; // B is the width of influence
+            
+            if (Dw >= failureDepth) {
+                gamma_star = gamma;
+                gamma_explanation = `Condition: $D_w (${Dw}) > D_f + B (${parseFloat(Df+B).toFixed(2)})$. No correction needed.`;
+                gamma_calc_text = `\\gamma_{eff} = \\gamma = ${gamma}`;
+            } else if (Dw <= Df) {
+                gamma_star = gamma_prime;
+                gamma_explanation = `Condition: $D_w (${Dw}) \\le D_f (${Df})$. Use submerged unit weight.`;
+                gamma_calc_text = `\\gamma_{eff} = \\gamma' = \\gamma - \\gamma_w = ${gamma} - 9.81 = ${gamma_prime.toFixed(2)}`;
+            } else {
+                const ratio = (Dw - Df) / B;
+                gamma_star = gamma_prime + ratio * (gamma - gamma_prime);
+                // Detailed justification text with variables clearly defined
+                gamma_explanation = `Condition: $D_f (${Df}) < D_w (${Dw}) < D_f + B (${parseFloat(Df+B).toFixed(2)})$. Interpolate unit weight.`;
+                gamma_calc_text = `\\gamma_{eff} = \\gamma' + \\frac{D_w-D_f}{B}(\\gamma - \\gamma') = ${gamma_prime.toFixed(2)} + \\frac{${Dw}-${Df}}{${B}}(${gamma}-${gamma_prime.toFixed(2)}) = ${gamma_star.toFixed(2)}`;
+            }
+
+            // 3. N Factors
+            const phiRad = phi * (Math.PI / 180);
+            const num = Math.exp(2 * (3 * Math.PI / 4 - phiRad / 2) * Math.tan(phiRad));
+            const den = 2 * Math.pow(Math.cos((45 + phi / 2) * (Math.PI / 180)), 2);
+            const Nq = num / den;
+            const Nc = (phi < 0.001) ? 5.7 : (Nq - 1) / Math.tan(phiRad);
+            const Ngamma = (Nq - 1) * Math.tan(1.4 * phiRad); 
+
+            // 4. Shape Factors
+            let sc, sy, eqStr, shape_explanation;
+            if (shape === 'square') { sc = 1.3; sy = 0.4; shape_explanation = "Square Footing Factors: $s_c = 1.3$, $s_\\gamma = 0.4$"; eqStr = "q_u = 1.3 c' N_c + q N_q + 0.4 \\gamma_{eff} B N_\\gamma"; }
+            else if (shape === 'circular') { sc = 1.3; sy = 0.3; shape_explanation = "Circular Footing Factors: $s_c = 1.3$, $s_\\gamma = 0.3$"; eqStr = "q_u = 1.3 c' N_c + q N_q + 0.3 \\gamma_{eff} B N_\\gamma"; }
+            else { sc = 1.0; sy = 0.5; shape_explanation = "Strip Footing Factors: $s_c = 1.0$, $s_\\gamma = 0.5$"; eqStr = "q_u = c' N_c + q N_q + 0.5 \\gamma_{eff} B N_\\gamma"; }
+
+            // 5. Final Calc
+            const term1 = sc * c * Nc;
+            const term2 = q_surcharge * Nq;
+            const term3 = sy * gamma_star * B * Ngamma;
+            const q_ult = term1 + term2 + term3;
+            const q_all = q_ult / FS;
+            
+            let Area = 0, areaStr = "";
+            if (shape === 'square') { Area = B * B; areaStr = `${B}^2`; }
+            else if (shape === 'circular') { Area = Math.PI * Math.pow(B/2, 2); areaStr = `\\pi (${B}/2)^2`; }
+            else { Area = B * 1; areaStr = `${B} \\times 1`; }
+            const Q_load = q_all * Area;
+
+            const stepsHtml = `
+                <div class="step-box">
+                    <div class="step-title">1. Groundwater & Surcharge</div>
+                    <p class="step-explanation">${q_explanation}</p>
+                    <p>$$ ${q_calc_text} \\text{ kPa} $$</p>
+                    <p class="step-explanation">${gamma_explanation}</p>
+                    <p>$$ ${gamma_calc_text} \\text{ kN/m}^3 $$</p>
+                </div>
+                <div class="step-box">
+                    <div class="step-title">2. Bearing Capacity Factors ($\\phi = ${phi}^\\circ$)</div>
+                    <p><strong>Formulas:</strong></p>
+                    <p>$$ N_q = \\frac{e^{2(3\\pi/4 - \\phi/2)\\tan\\phi}}{2\\cos^2(45+\\phi/2)} $$</p>
+                    <p>$$ N_c = (N_q - 1)\\cot\\phi $$</p>
+                    <p>$$ N_\\gamma \\approx (N_q - 1)\\tan(1.4\\phi) $$</p>
+                    
+                    <p style="margin-top:15px;"><strong>Substitution:</strong></p>
+                    <p>$$ N_q = \\frac{e^{2(3\\pi/4 - ${phi/2})\\tan(${phi})}}{2\\cos^2(45+${phi/2})} = \\mathbf{${Nq.toFixed(2)}} $$</p>
+                    <p>$$ N_c = (${Nq.toFixed(2)} - 1)\\cot(${phi}^\\circ) = \\mathbf{${Nc.toFixed(2)}} $$</p>
+                    <p>$$ N_\\gamma \\approx (${Nq.toFixed(2)} - 1)\\tan(1.4 \\times ${phi}^\\circ) = \\mathbf{${Ngamma.toFixed(2)}} $$</p>
+                    
+                    <div class="step-note">Note: Terzaghi's original $N_\\gamma$ is graphical/empirical. Therefore, engineers use an approximation formula (like Kumbhojkar's) that mathematically relates it to $N_q$ to match Terzaghi's data points.</div>
+                </div>
+                <div class="step-box">
+                    <div class="step-title">3. Ultimate Capacity ($q_u$)</div>
+                    <p>${shape_explanation}</p>
+                    <p><strong>Formula:</strong></p>
+                    <p>$$ ${eqStr} $$</p>
+                    <p><strong>Substitution:</strong></p>
+                    <p>$$ q_u = (${sc}\\cdot${c}\\cdot${Nc.toFixed(2)}) + (${q_surcharge.toFixed(2)}\\cdot${Nq.toFixed(2)}) + (${sy}\\cdot${gamma_star.toFixed(2)}\\cdot${B}\\cdot${Ngamma.toFixed(2)}) $$</p>
+                    <p>$$ q_u = ${term1.toFixed(2)} + ${term2.toFixed(2)} + ${term3.toFixed(2)} = \\mathbf{${q_ult.toFixed(2)} \\text{ kPa}} $$</p>
+                </div>
+                <div class="final-answer">
+                    <div>Allowable Bearing Capacity</div>
+                    <div style="font-size:1.2em; margin-top:10px;">$$ q_{all} = \\frac{q_u}{FS} = \\frac{${q_ult.toFixed(2)}}{${FS}} = \\mathbf{${q_all.toFixed(2)} \\text{ kPa}} $$</div>
+                    <div style="margin-top:20px; border-top:1px dashed currentColor; padding-top:15px;">
+                        <strong>Allowable Gross Load ($Q_{all}$)</strong>
+                        <div>$$ Q_{all} = q_{all} \\times \\text{Area} = ${q_all.toFixed(2)} \\times ${Area.toFixed(2)} = \\mathbf{${Q_load.toFixed(2)} \\text{ kN}} $$</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('calculation-steps').innerHTML = stepsHtml;
+            document.getElementById('results').style.display = 'block';
+            
+            // Show BOTH print buttons
+            document.querySelectorAll('.print-btn-trigger').forEach(btn => {
+                btn.style.display = 'inline-flex';
+            });
+            
+            MathJax.typesetPromise();
+            document.getElementById('results').scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onload = updateDiagram;
+
+        // --- METHOD 3: PRINT POPUP LOGIC (SINGLE PAGE OPTIMIZED) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach event listener to ALL print buttons (top and bottom)
+            const printBtns = document.querySelectorAll('.print-btn-trigger');
+            
+            printBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const headContent = document.head.innerHTML;
+                    // Clone the main content for the popup
+                    const mainContent = document.getElementById('main-content').cloneNode(true);
+                    
+                    // Ensure results are visible in the clone
+                    const resultsSec = mainContent.querySelector('.results-section');
+                    if(resultsSec) resultsSec.style.display = 'block';
+
+                    const win = window.open('', '', 'height=800,width=1000');
+                    
+                    if (win) {
+                        win.document.write('<html><head>');
+                        win.document.write('<title>Bearing Capacity Report</title>');
+                        win.document.write(headContent);
+                        // CSS FOR SINGLE PAGE A4 LAYOUT
+                        win.document.write(`
+                            <style>
+                                /* Basic Reset */
+                                body { background: white; margin: 0; padding: 15mm; font-size: 11px; font-family: 'Plus Jakarta Sans', sans-serif; }
+                                h1 { font-size: 18px; margin-bottom: 5px; }
+                                p, .citation { font-size: 10px; margin-bottom: 5px; }
+                                
+                                /* Hide UI Elements */
+                                .calc-actions, .nav-actions, .back-link, .tabs, .print-btn-trigger { display: none !important; }
+                                
+                                /* Force Tabs to Show */
+                                .tab-content { display: block !important; }
+                                
+                                /* Layout: Keep Side-by-Side to save vertical space */
+                                .calc-layout { 
+                                    display: grid !important; 
+                                    grid-template-columns: 1fr 1fr; 
+                                    gap: 15px; 
+                                    margin-bottom: 15px;
+                                }
+                                
+                                .input-card, .diagram-card { 
+                                    box-shadow: none; 
+                                    border: 1px solid #ccc;
+                                    width: 100%;
+                                    min-height: 250px; /* Reduced height */
+                                    padding: 10px;
+                                }
+                                
+                                /* Compact Results */
+                                .results-section { 
+                                    display: block !important; 
+                                    margin-top: 10px; 
+                                    box-shadow: none; 
+                                    border: 1px solid #ccc; 
+                                    padding: 15px; 
+                                }
+                                .result-header { font-size: 14px; padding-bottom: 5px; margin-bottom: 10px; }
+                                .step-box { padding: 10px; margin-bottom: 10px; }
+                                .step-title { font-size: 11px; margin-bottom: 5px; }
+                                .final-answer { padding: 15px; margin-top: 10px; }
+                                
+                                /* Scale main container to ensure fit on 1 page (0.75) */
+                                .container { 
+                                    width: 100%; 
+                                    max-width: 100%; 
+                                    padding: 0; 
+                                    transform: scale(0.75); 
+                                    transform-origin: top center; 
+                                }
+                            </style>
+                        `);
+                        win.document.write('</head><body>');
+                        win.document.write('<main class="container">' + mainContent.innerHTML + '</main>');
+                        win.document.write('</body></html>');
+                        
+                        win.document.close();
+                        win.focus();
+                        
+                        // Wait for rendering then print
+                        setTimeout(function(){
+                            win.print();
+                        }, 1500);
+                    } else {
+                        alert("Please allow popups to download the PDF.");
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
