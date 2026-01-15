@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Electrical Engineering | EngCalc.app</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. VARIABLES & THEMES --- */
+        :root {
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #0f172a;   
+            --text-muted: #475569;
+            --brand-navy: #0f172a; 
+            --brand-blue: #2563eb; 
+            --border-color: #e2e8f0;
+            --logo-text: #000000;
+            --logo-dot: #2563eb;
+            --grid-color: rgba(15, 23, 42, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #020617;       
+            --bg-surface: #0f172a; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --brand-navy: #ffffff;
+            --brand-blue: #60a5fa;
+            --border-color: #1e293b;
+            --logo-text: #ffffff;
+            --logo-dot: #60a5fa;
+            --grid-color: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-accessibility="blind"] {
+            --bg-body: #ffffff !important;
+            --bg-surface: #ffffff !important;
+            --text-main: #000000 !important;
+            --text-muted: #000000 !important;
+            --brand-navy: #000000 !important;
+            --brand-blue: #000000 !important;
+            --border-color: #000000 !important;
+            --logo-text: #000000 !important;
+            --logo-dot: #000000 !important;
+            --grid-color: transparent !important;
+        }
+
+        /* --- 2. RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { transition: transform 0.2s ease, opacity 0.3s ease, background-color 0s, color 0s; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+        /* --- 3. NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+        
+        [data-theme="dark"] nav { background: rgba(2, 6, 23, 0.7); }
+        [data-accessibility="blind"] nav { background: white; border-bottom: 3px solid black; backdrop-filter: none; }
+
+        .nav-group { display: flex; align-items: center; gap: 3rem; }
+
+        .logo {
+            font-family: 'Cairo Play', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex; align-items: baseline;
+        }
+        .logo-main { color: var(--logo-text); }
+        .logo-app { color: var(--logo-dot); }
+
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-item {
+            font-size: 0.95rem; font-weight: 600; color: var(--text-muted); position: relative;
+        }
+        .nav-item.active { color: var(--brand-blue); font-weight: 800; }
+        .nav-item:hover { color: var(--brand-blue); }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* --- NEW CONTACT BUTTON STYLE --- */
+        .btn-nav-contact {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--brand-navy);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            margin-right: 0.5rem; /* Space between button and toggles */
+            background: var(--bg-surface);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-contact:hover {
+            background: var(--brand-blue);
+            color: white;
+            border-color: var(--brand-blue);
+            transform: translateY(-2px);
+        }
+
+        [data-accessibility="blind"] .btn-nav-contact { 
+            border: 2px solid black; 
+            background: white; 
+            color: black;
+            text-decoration: underline;
+        }
+
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid var(--border-color);
+            color: var(--text-main); display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { background-color: var(--brand-blue); color: white; border-color: var(--brand-blue); }
+
+        /* --- 4. HERO SECTION --- */
+        .hero {
+            min-height: 50vh; 
+            min-height: 50dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+            text-align: center;  
+            padding: 8rem 5% 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-spotlight {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(600px circle at var(--x) var(--y), rgba(37, 99, 235, 0.08), transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        [data-theme="dark"] .hero-spotlight {
+            background: radial-gradient(600px circle at var(--x) var(--y), rgba(96, 165, 250, 0.1), transparent 40%);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            line-height: 1.1; font-weight: 800; letter-spacing: -1px;
+            margin-bottom: 1rem; color: var(--brand-navy);
+            animation: fadeUp 0.8s ease forwards 0.2s; opacity: 0;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            max-width: 600px; margin: 0 auto; 
+            color: var(--text-muted); font-weight: 300;
+            animation: fadeUp 0.8s ease forwards 0.4s; opacity: 0;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 5. TOPIC GRID --- */
+        .section-header { padding: 2rem 5% 3rem; max-width: 1400px; margin: 0 auto; text-align: left; }
+        .section-header h2 { font-size: 1.8rem; font-weight: 700; color: var(--brand-navy); border-left: 5px solid var(--brand-blue); padding-left: 1rem; }
+
+        .tools-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 1.5rem; padding: 0 5% 6rem; max-width: 1400px; margin: 0 auto;
+        }
+
+        .tool-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem 2rem; border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            height: 400px; 
+            position: relative; overflow: hidden;
+        }
+        
+        [data-accessibility="blind"] .tool-card { border: 3px solid black; }
+        .tool-card:hover { transform: translateY(-5px); border-color: var(--brand-blue); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+
+        .icon-box { 
+            display: flex; align-items: center; justify-content: flex-start;
+            margin-bottom: 1.5rem; height: 60px;
+        }
+        /* UPDATED: Default Icon Color is now BLUE */
+        .icon-box i { font-size: 2.5rem; color: var(--brand-blue); }
+
+        /* --- CUSTOM MICROCHIP ICON --- */
+        .chip-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--text-main); /* Dark body */
+            border-radius: 4px;
+            position: relative;
+            margin: 10px;
+            /* Inner "Silicon" Square */
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .chip-icon::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background-color: var(--brand-blue); /* BLUE Center */
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+
+        /* The Pins */
+        .chip-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px; height: 44px; 
+            z-index: -1;
+            background: 
+                linear-gradient(90deg, var(--text-muted) 50%, transparent 50%),
+                linear-gradient(0deg, var(--text-muted) 50%, transparent 50%);
+            background-size: 44px 4px, 4px 44px; 
+            background-repeat: repeat-y, repeat-x;
+            background-position: center;
+            -webkit-mask: radial-gradient(transparent 17px, black 18px);
+            mask: radial-gradient(transparent 17px, black 18px);
+        }
+
+        /* Hover Effect: Chip Glows BLUE */
+        .tool-card:hover .chip-icon::after {
+            box-shadow: 0 0 10px var(--brand-blue);
+        }
+        .tool-card:hover .chip-icon {
+            transform: scale(1.1);
+        }
+
+        /* --- TEXT STYLES --- */
+        .tool-card h3 { font-size: 1.8rem; margin-bottom: 1rem; line-height: 1.1; }
+        .tool-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
+
+        .btn-open {
+            margin-top: 2rem; padding: 1rem 0;
+            border-bottom: 2px solid var(--border-color);
+            text-align: left; font-weight: 700; color: var(--brand-navy);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .tool-card:hover .btn-open { border-color: var(--brand-blue); color: var(--brand-blue); }
+
+        /* --- 6. FOOTER --- */
+        footer { 
+            border-top: 1px solid var(--border-color); 
+            text-align: center; 
+            background: var(--bg-body); 
+            padding: 4rem 5% 8rem 5%;
+            padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .footer-logo { margin-bottom: 1.5rem; }
+        .footer-contacts { display: flex; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; justify-content: center; }
+        .contact-link {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-size: 0.95rem; font-weight: 500; color: var(--text-muted);
+            padding: 0.6rem 1.2rem; border-radius: 50px;
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+        }
+        .contact-link:hover { color: white; background: var(--brand-blue); border-color: var(--brand-blue); }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) { .nav-links { display: none; } }
+        @media (max-width: 768px) {
+            .hero { padding-top: 7rem; min-height: auto; padding-bottom: 2rem; }
+        }
+        
+        /* NEW: Hide contact button on very small screens to avoid header overcrowding */
+        @media (max-width: 480px) {
+            .btn-nav-contact { display: none; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav>
+        <div class="nav-group">
+            <a href="https://www.engcalc.app" class="logo">
+                <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="https://www.engcalc.app/Civil" class="nav-item">Civil</a>
+                <a href="https://www.engcalc.app/Mechanical" class="nav-item">Mechanical</a>
+                <a href="https://www.engcalc.app/Electrical" class="nav-item active">Electrical</a>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <a href="https://www.engcalc.app/report" class="btn-nav-contact">Contact Us</a>
+
+            <button class="icon-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="accessToggle"><i class="fa-solid fa-eye"></i></button>
+        </div>
+    </nav>
+
+    <section class="hero" id="hero-section">
+        <div class="hero-spotlight" id="spotlight"></div>
+        <h1>Electrical Engineering</h1>
+        <p>Precision tools for Circuit Analysis, Power Systems, and Electromagnetics.</p>
+    </section>
+
+    <section id="elec-tools">
+        <div class="section-header"><h2>Select Topic</h2></div>
+        
+        <div class="tools-grid">
+            
+            <div class="tool-card">
+                <div>
+                    <div class="icon-box"><i class="fa-solid fa-bolt"></i></div>
+                    <h3>Power Systems</h3>
+                    <p>Load flow analysis, voltage drop, short circuit calculations, and cable sizing standards.</p>
+                </div>
+                
+                <a href="https://www.engcalc.app/Electrical/POWER" class="btn-open">
+                    Launch Tools <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="tool-card">
+                <div>
+                    <div class="icon-box">
+                        <div class="chip-icon"></div>
+                    </div>
+                    <h3>Electronics</h3>
+                    <p>Logic gate simulation, filter design, op-amp gain configurations, and PCB impedance matching.</p>
+                </div>
+                
+                <a href="https://www.engcalc.app/Electrical/ELECTRONICS" class="btn-open">
+                    Launch Tools <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="tool-card">
+                <div>
+                    <div class="icon-box"><i class="fa-regular fa-lightbulb"></i></div>
+                    <h3>More</h3>
+                    <p>Battery capacity, lighting flux (Lux) calculations, energy consumption, and signal processing.</p>
+                </div>
+                
+                <a href="https://www.engcalc.app/Electrical/OTHER" class="btn-open">
+                    Launch Tools <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <div class="logo footer-logo">
+            <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+        </div>
+
+        <div class="footer-contacts">
+            <a href="https://www.instagram.com/engcalc.app" class="contact-link"><i class="fa-brands fa-instagram"></i> <span>EngCalc.app</span></a>
+            <a href="https://www.linkedin.com/company/engcalc" class="contact-link"><i class="fa-brands fa-linkedin"></i> <span>EngCalc.app</span></a>
+            <a href="mailto:info@engcalc.app" class="contact-link"><i class="fa-solid fa-envelope"></i> <span>info@engcalc.app</span></a>
+        </div>
+
+        <p style="color: var(--text-muted)">© 2026 EngCalc.app</p>
+    </footer>
+
+    <script>
+        // SPOTLIGHT LOGIC
+        const heroSection = document.getElementById('hero-section');
+        heroSection.addEventListener('mousemove', (e) => {
+            const rect = heroSection.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            heroSection.style.setProperty('--x', `${x}px`);
+            heroSection.style.setProperty('--y', `${y}px`);
+        });
+
+        // THEME & ACCESS TOGGLES
+        const themeBtn = document.getElementById('themeToggle');
+        const accessBtn = document.getElementById('accessToggle');
+        const body = document.body;
+
+        themeBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        accessBtn.addEventListener('click', () => {
+            const isBlind = body.getAttribute('data-accessibility') === 'blind';
+            if(isBlind) {
+                body.removeAttribute('data-accessibility');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            } else {
+                body.setAttribute('data-accessibility', 'blind');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            }
+        });
+    </script>
+</body>
+</html>

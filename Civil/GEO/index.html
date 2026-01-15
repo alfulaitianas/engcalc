@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Geotechnical Tools | EngCalc.app</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. VARIABLES & THEMES --- */
+        :root {
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #0f172a;   
+            --text-muted: #475569;
+            --brand-navy: #0f172a; 
+            --brand-blue: #2563eb; 
+            --brand-blue-light: rgba(37, 99, 235, 0.1);
+            --border-color: #e2e8f0;
+            --logo-text: #000000;
+            --logo-dot: #2563eb;
+            --grid-color: rgba(15, 23, 42, 0.05);
+
+            /* Status Colors */
+            --status-success-bg: #dcfce7;
+            --status-success-text: #166534;
+            --status-danger-bg: #fee2e2;
+            --status-danger-text: #991b1b;
+            --badge-bg: #e2e8f0;
+            --badge-text: #475569;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #020617;        
+            --bg-surface: #0f172a; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --brand-navy: #ffffff;
+            --brand-blue: #60a5fa;
+            --brand-blue-light: rgba(96, 165, 250, 0.15);
+            --border-color: #1e293b;
+            --logo-text: #ffffff;
+            --logo-dot: #60a5fa;
+            --grid-color: rgba(255, 255, 255, 0.05);
+
+            --status-success-bg: #064e3b; 
+            --status-success-text: #6ee7b7;
+            --status-danger-bg: #7f1d1d;
+            --status-danger-text: #fca5a5;
+            --badge-bg: #1e293b;
+            --badge-text: #94a3b8;
+        }
+
+        [data-accessibility="blind"] {
+            --bg-body: #ffffff !important;
+            --bg-surface: #ffffff !important;
+            --text-main: #000000 !important;
+            --text-muted: #000000 !important;
+            --brand-navy: #000000 !important;
+            --brand-blue: #000000 !important;
+            --border-color: #000000 !important;
+            --logo-text: #000000 !important;
+            --logo-dot: #000000 !important;
+            --grid-color: transparent !important;
+            --status-success-bg: #ffffff !important;
+            --status-success-text: #000000 !important;
+            --status-danger-bg: #ffffff !important;
+            --status-danger-text: #000000 !important;
+            --badge-bg: #ffffff !important;
+            --badge-text: #000000 !important;
+        }
+
+        /* --- 2. RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { transition: transform 0.2s ease, opacity 0.3s ease, background-color 0s, color 0s, border-color 0s; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+        /* --- 3. NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+        
+        [data-theme="dark"] nav { background: rgba(2, 6, 23, 0.7); }
+        [data-accessibility="blind"] nav { background: white; border-bottom: 3px solid black; backdrop-filter: none; }
+
+        .nav-group { display: flex; align-items: center; gap: 3rem; }
+
+        .logo {
+            font-family: 'Cairo Play', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex; align-items: baseline;
+        }
+        .logo-main { color: var(--logo-text); }
+        .logo-app { color: var(--logo-dot); }
+
+        .back-link {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: var(--text-muted); font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { color: var(--brand-blue); }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+        /* --- NEW CONTACT BUTTON STYLE --- */
+        .btn-nav-contact {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--brand-navy);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            margin-right: 0.5rem; /* Space between button and toggles */
+            background: var(--bg-surface);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-contact:hover {
+            background: var(--brand-blue);
+            color: white;
+            border-color: var(--brand-blue);
+            transform: translateY(-2px);
+        }
+
+        [data-accessibility="blind"] .btn-nav-contact { 
+            border: 2px solid black; 
+            background: white; 
+            color: black;
+            text-decoration: underline;
+        }
+        
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid var(--border-color);
+            color: var(--text-main); display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { background-color: var(--brand-blue); color: white; border-color: var(--brand-blue); }
+
+        /* --- 4. HERO SECTION --- */
+        .hero {
+            padding: 8rem 5% 2rem;
+            text-align: center;  
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-spotlight {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(600px circle at var(--x) var(--y), rgba(37, 99, 235, 0.08), transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        [data-theme="dark"] .hero-spotlight {
+            background: radial-gradient(600px circle at var(--x) var(--y), rgba(96, 165, 250, 0.1), transparent 40%);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            line-height: 1.1; font-weight: 800; letter-spacing: -1px;
+            margin-bottom: 1rem; color: var(--brand-navy);
+            animation: fadeUp 0.8s ease forwards 0.2s; opacity: 0;
+        }
+        
+        .hero-icon { font-size: 2rem; color: var(--brand-blue); margin-right: 10px; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 5. SEARCH --- */
+        .search-container {
+            max-width: 100%; 
+            margin: 0 auto 3rem auto;
+            position: relative;
+            padding: 0 5%;
+            animation: fadeUp 0.8s ease forwards 0.4s; opacity: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px var(--brand-blue-light);
+        }
+
+        [data-accessibility="blind"] .search-input { border: 3px solid black; }
+
+        /* --- 6. TOOLS GRID --- */
+        .tools-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 1.5rem; 
+            padding: 0 5% 6rem; 
+            max-width: 1400px; 
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        .tool-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem; 
+            border-radius: 12px;
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+            animation: fadeUp 0.5s ease-out forwards;
+        }
+        
+        [data-accessibility="blind"] .tool-card { border: 3px solid black; }
+        
+        .tool-card:hover { 
+            transform: translateY(-5px); 
+            border-color: var(--brand-blue); 
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); 
+        }
+
+        /* Meta Row */
+        .card-meta {
+            display: flex; 
+            justify-content: flex-start; /* Changed to start so they stack left */
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success { background-color: var(--status-success-bg); color: var(--status-success-text); }
+        .badge-danger { background-color: var(--status-danger-bg); color: var(--status-danger-text); }
+        
+        [data-accessibility="blind"] .badge { border: 1px solid black; }
+
+        /* Content */
+        .tool-title { 
+            font-size: 1.3rem; 
+            font-weight: 700; 
+            color: var(--brand-navy); 
+            margin-bottom: 0.5rem; 
+            line-height: 1.2;
+        }
+
+        .method-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--brand-blue);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+        .method-tag i { margin-right: 5px; }
+
+        .tool-desc { 
+            color: var(--text-muted); 
+            font-size: 0.95rem; 
+            line-height: 1.6; 
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Actions */
+        .tool-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn {
+            padding: 0.7rem;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 6px;
+        }
+
+        .btn-open { 
+            background-color: var(--brand-blue); 
+            color: white; 
+        }
+        .btn-open:hover { opacity: 0.9; }
+
+        .btn-info { 
+            background-color: transparent; 
+            color: var(--text-muted); 
+            border: 1px solid var(--border-color); 
+        }
+        .btn-info:hover { 
+            border-color: var(--brand-blue); 
+            color: var(--brand-blue); 
+        }
+
+        [data-accessibility="blind"] .btn { border: 2px solid black; background: white; color: black; font-weight: 900; }
+
+        /* --- 7. FOOTER --- */
+        footer { 
+            border-top: 1px solid var(--border-color); 
+            text-align: center; 
+            background: var(--bg-body); 
+            padding: 4rem 5%;
+            margin-top: auto;
+        }
+        
+        .footer-logo { margin-bottom: 1rem; justify-content: center; }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+
+        @media (max-width: 768px) {
+            .hero { padding-top: 6rem; padding-bottom: 1rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* NEW: Hide contact button on very small screens to avoid header overcrowding */
+        @media (max-width: 480px) {
+            .btn-nav-contact { display: none; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav>
+        <div class="nav-group">
+            <a href="https://www.engcalc.app" class="logo">
+                <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+            </a>
+            <a href="https://www.engcalc.app/Civil" class="back-link"><i class="fa-solid fa-arrow-left"></i> Hub</a>
+        </div>
+
+        <div class="nav-actions">
+            <a href="https://www.engcalc.app/report" class="btn-nav-contact">Contact Us</a>
+
+            <button class="icon-btn" id="themeToggle" aria-label="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="accessToggle" aria-label="Toggle Accessibility Mode"><i class="fa-solid fa-eye"></i></button>
+        </div>
+    </nav>
+
+    <section class="hero" id="hero-section">
+        <div class="hero-spotlight" id="spotlight"></div>
+        <h1><i class="fa-solid fa-layer-group hero-icon"></i>Geotechnical Tools</h1>
+        <p style="color: var(--text-muted); margin-top: 10px;">Select a calculator below to perform analysis</p>
+    </section>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search...">
+    </div>
+
+    <main class="tools-grid">
+        
+        <div class="tool-card">
+            <div class="card-meta">
+                <span class="badge">ID: GEO-1</span>
+                <span class="badge">Author: Anas Al Fulaiti</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: Dr.Mo (12/JAN/2026)</span>
+            </div>
+            <div class="tool-title">Bearing Capacity</div>
+            <div class="method-tag"><i class="fa-solid fa-calculator"></i> Method: Terzaghi (1943)</div>
+            <p class="tool-desc">Calculate the ultimate bearing capacity of soil for shallow foundations based on Terzaghi's general shear failure theory.</p>
+            <div class="tool-actions">
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-1/calc" class="btn btn-open">Open <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-1" class="btn btn-info"><i class="fa-solid fa-circle-info"></i> Info</a>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <div class="card-meta">
+                <span class="badge">ID: GEO-2</span>
+                <span class="badge">Author: Mike Ross</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: Emily Z. (15/FEB/2026)</span>
+            </div>
+            <div class="tool-title">Foundation Settlement</div>
+            <div class="method-tag"><i class="fa-solid fa-calculator"></i> Elastic Theory</div>
+            <p class="tool-desc">Estimate immediate elastic settlement of foundations on granular soils or undrained clays using Young's Modulus.</p>
+            <div class="tool-actions">
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-2/calc" class="btn btn-open">Open <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-2" class="btn btn-info"><i class="fa-solid fa-circle-info"></i> Info</a>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <div class="card-meta">
+                <span class="badge">ID: GEO-3</span>
+                <span class="badge">Author: David Miller</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: Sarah C. (14/FEB/2026)</span>
+            </div>
+            <div class="tool-title">Slope Stability</div>
+            <div class="method-tag"><i class="fa-solid fa-calculator"></i> Bishop's Simplified</div>
+            <p class="tool-desc">Determine the factor of safety for circular slip surfaces in soil slopes using the method of slices.</p>
+            <div class="tool-actions">
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-3/calc" class="btn btn-open">Open <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-3" class="btn btn-info"><i class="fa-solid fa-circle-info"></i> Info</a>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <div class="card-meta">
+                <span class="badge">ID: GEO-4</span>
+                <span class="badge">Author: Emily Zhang</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: J. Wilson (20/MAR/2026)</span>
+            </div>
+            <div class="tool-title">Soil Classification</div>
+            <div class="method-tag"><i class="fa-solid fa-calculator"></i> USCS / AASHTO</div>
+            <p class="tool-desc">Classify soil types based on sieve analysis data and Atterberg limits inputs (LL, PL).</p>
+            <div class="tool-actions">
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-4/calc" class="btn btn-open">Open <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-4" class="btn btn-info"><i class="fa-solid fa-circle-info"></i> Info</a>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <div class="card-meta">
+                <span class="badge">ID: GEO-5</span>
+                <span class="badge">Author: Chris P.</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: A. Kumar (10/APR/2026)</span>
+            </div>
+            <div class="tool-title">Immediate Settlement</div>
+            <div class="method-tag"><i class="fa-solid fa-calculator"></i> Elastic Theory</div>
+            <p class="tool-desc">Estimate elastic settlement of foundations on granular soils or undrained clays.</p>
+            <div class="tool-actions">
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-5/calc" class="btn btn-open">Open <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-5" class="btn btn-info"><i class="fa-solid fa-circle-info"></i> Info</a>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <div class="card-meta">
+                <span class="badge">ID: GEO-6</span>
+                <span class="badge">Author: R. Sanchez</span>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: M. Lee (05/APR/2026)</span>
+            </div>
+            <div class="tool-title">Lateral Earth Pressure</div>
+            <div class="method-tag"><i class="fa-solid fa-calculator"></i> Rankine / Coulomb</div>
+            <p class="tool-desc">Calculate active and passive lateral earth pressures for retaining wall design.</p>
+            <div class="tool-actions">
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-6/calc" class="btn btn-open">Open <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="https://www.engcalc.app/Civil/GEO/GEO-6" class="btn btn-info"><i class="fa-solid fa-circle-info"></i> Info</a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="logo footer-logo">
+            <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+        </div>
+        <p class="footer-text">&copy; 2026 EngCalc.app. Built for the Geotechnical Engineering Community.</p>
+    </footer>
+
+    <script>
+        // --- 1. SPOTLIGHT LOGIC ---
+        const heroSection = document.getElementById('hero-section');
+        heroSection.addEventListener('mousemove', (e) => {
+            const rect = heroSection.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            heroSection.style.setProperty('--x', `${x}px`);
+            heroSection.style.setProperty('--y', `${y}px`);
+        });
+
+        // --- 2. THEME & ACCESS TOGGLES ---
+        const themeBtn = document.getElementById('themeToggle');
+        const accessBtn = document.getElementById('accessToggle');
+        const body = document.body;
+
+        // Check Local Storage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+            themeBtn.innerHTML = savedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        accessBtn.addEventListener('click', () => {
+            const isBlind = body.getAttribute('data-accessibility') === 'blind';
+            if(isBlind) {
+                body.removeAttribute('data-accessibility');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            } else {
+                body.setAttribute('data-accessibility', 'blind');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            }
+        });
+
+        // --- 3. SEARCH FUNCTIONALITY ---
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.tool-card');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+
+            cards.forEach(card => {
+                const title = card.querySelector('.tool-title').textContent.toLowerCase();
+                const desc = card.querySelector('.tool-desc').textContent.toLowerCase();
+                const method = card.querySelector('.method-tag').textContent.toLowerCase();
+
+                if (title.includes(searchTerm) || desc.includes(searchTerm) || method.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Report & Request | EngCalc.app</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. VARIABLES & THEMES (EXACT COPY) --- */
+        :root {
+            /* THEME: Modern Navy (Light Mode) */
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #0f172a;   
+            --text-muted: #475569;
+            
+            --brand-navy: #0f172a; 
+            --brand-blue: #2563eb; 
+            
+            --border-color: #e2e8f0;
+            
+            --logo-text: #000000;
+            --logo-dot: #2563eb;
+            
+            --grid-color: rgba(15, 23, 42, 0.05);
+        }
+
+        /* DARK MODE */
+        [data-theme="dark"] {
+            --bg-body: #020617;      
+            --bg-surface: #0f172a; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            
+            --brand-navy: #ffffff;
+            --brand-blue: #60a5fa;
+            
+            --border-color: #1e293b;
+            
+            --logo-text: #ffffff;
+            --logo-dot: #60a5fa;
+            
+            --grid-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* HIGH CONTRAST (Blind Mode) */
+        [data-accessibility="blind"] {
+            --bg-body: #ffffff !important;
+            --bg-surface: #ffffff !important;
+            --text-main: #000000 !important;
+            --text-muted: #000000 !important;
+            --brand-navy: #000000 !important;
+            --brand-blue: #000000 !important;
+            --border-color: #000000 !important;
+            --logo-text: #000000 !important;
+            --logo-dot: #000000 !important;
+            --grid-color: transparent !important;
+        }
+
+        /* --- 2. RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        * { transition: transform 0.2s ease, opacity 0.3s ease, background-color 0s, color 0s; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+        /* --- 3. NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+        
+        [data-theme="dark"] nav { background: rgba(2, 6, 23, 0.7); }
+        [data-accessibility="blind"] nav { background: white; border-bottom: 3px solid black; backdrop-filter: none; }
+
+        .nav-group { display: flex; align-items: center; gap: 3rem; }
+
+        .logo {
+            font-family: 'Cairo Play', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex; align-items: baseline;
+        }
+        .logo-main { color: var(--logo-text); }
+        .logo-app { color: var(--logo-dot); }
+
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-item { font-size: 0.95rem; font-weight: 600; color: var(--text-muted); position: relative; }
+        .nav-item:hover { color: var(--brand-blue); }
+        [data-accessibility="blind"] .nav-item { text-decoration: underline; font-weight: 800; }
+
+        .nav-actions { display: flex; gap: 0.5rem; }
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid var(--border-color);
+            color: var(--text-main); display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { background-color: var(--brand-blue); color: white; border-color: var(--brand-blue); }
+
+        /* --- 4. CONTACT HERO SECTION --- */
+        .contact-header {
+            padding: 8rem 5% 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .contact-header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            color: var(--brand-navy);
+            margin-bottom: 1rem;
+        }
+
+        .contact-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- 5. FORM SECTION --- */
+        .form-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 6rem;
+            padding: 0 5%;
+        }
+
+        .form-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            position: relative;
+            z-index: 2;
+        }
+
+        [data-accessibility="blind"] .form-card { border: 3px solid black; }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--brand-navy);
+            color: white;
+            padding: 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        
+        [data-theme="dark"] .btn-submit { background-color: var(--brand-blue); }
+        .btn-submit:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* Direct Email Box */
+        .direct-email {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .direct-email h3 { font-size: 1.2rem; color: var(--brand-navy); margin-bottom: 0.5rem; }
+        .direct-email a { 
+            color: var(--brand-blue); 
+            font-weight: 700; 
+            font-size: 1.2rem;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        /* --- 6. FOOTER (Identical) --- */
+        footer { 
+            margin-top: auto;
+            border-top: 1px solid var(--border-color); 
+            text-align: center; 
+            background: var(--bg-body); 
+            display: flex; flex-direction: column; align-items: center;
+            padding: 4rem 5% 8rem 5%;
+            padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+        }
+        
+        .footer-logo { margin-bottom: 1.5rem; }
+
+        .footer-contacts {
+            display: flex; gap: 1rem; margin-bottom: 2.5rem;
+            flex-wrap: wrap; justify-content: center;
+        }
+
+        .contact-link {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-size: 0.95rem; font-weight: 500; color: var(--text-muted);
+            padding: 0.6rem 1.2rem; border-radius: 50px;
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+        }
+        .contact-link:hover {
+            color: white; background: var(--brand-blue); border-color: var(--brand-blue);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .oman-tag {
+            display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 2rem;
+            font-weight: 700; font-size: 0.9rem; color: var(--text-main);
+            border: 1px solid var(--border-color); padding: 0.6rem 1.5rem; border-radius: 100px;
+        }
+
+        @media (max-width: 900px) { .nav-links { display: none; } }
+        @media (max-width: 768px) { .footer-contacts { flex-direction: column; width: 100%; max-width: 320px; } }
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav>
+        <div class="nav-group">
+            <a href="index.html" class="logo">
+                <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="https://www.engcalc.app/Civil" class="nav-item">Civil</a>
+                <a href="https://www.engcalc.app/Mechanical" class="nav-item">Mechanical</a>
+                <a href="https://www.engcalc.app/Electrical" class="nav-item">Electrical</a>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <button class="icon-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="accessToggle"><i class="fa-solid fa-eye"></i></button>
+        </div>
+    </nav>
+
+    <section class="contact-header">
+        <h1>How can we help?</h1>
+        <p>Found a bug? Found a calculation error? Need a new tool? Let us know.</p>
+    </section>
+
+    <section class="form-container">
+        <div class="form-card">
+            <form id="reportForm">
+                
+                <div class="form-group">
+                    <label class="form-label">I want to...</label>
+                    <select class="form-select" id="reportType" required>
+                        <option value="Bug Report">Report a Bug (Technical Issue)</option>
+                        <option value="Calculation Error">Report a Calculation Error</option>
+                        <option value="Service Request">Request a Service / New Calculator</option>
+                        <option value="Other">Other Inquiry</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-input" id="userName" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Your Email (So we can reply)</label>
+                    <input type="email" class="form-input" id="userEmail" placeholder="john@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Details</label>
+                    <textarea class="form-textarea" id="userDetails" placeholder="Please describe the issue, the expected result, or the tool you need..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Send Report <i class="fa-solid fa-paper-plane"></i>
+                </button>
+
+            </form>
+
+            <div class="direct-email">
+                <h3>Prefer standard email?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem">You can send attachments or detailed files directly to:</p>
+                <a href="mailto:info@engcalc.app">info@engcalc.app</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="logo footer-logo">
+            <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+        </div>
+
+        <div class="footer-contacts">
+            <a href="https://www.instagram.com/engcalc.app?igsh=NG05dXJzZDExMGUz&utm_source=qr" class="contact-link">
+                <i class="fa-brands fa-instagram"></i>
+                <span>EngCalc.app</span>
+            </a>
+            
+            <a href="https://www.linkedin.com/company/engcalc" class="contact-link">
+                <i class="fa-brands fa-linkedin"></i>
+                <span>EngCalc.app</span>
+            </a>
+            
+            <a href="mailto:info@engcalc.app" class="contact-link">
+                <i class="fa-solid fa-envelope"></i>
+                <span>info@engcalc.app</span>
+            </a>
+        </div>
+
+        <p style="color: var(--text-muted)">© 2026 EngCalc.app</p>
+        <div class="oman-tag"><i class="fa-solid fa-location-dot" style="color: #c8102e"></i> Built in Oman for all</div>
+    </footer>
+
+    <script>
+        // --- 1. THEME & ACCESSIBILITY (SAME AS HOME) ---
+        const themeBtn = document.getElementById('themeToggle');
+        const accessBtn = document.getElementById('accessToggle');
+        const body = document.body;
+
+        themeBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        accessBtn.addEventListener('click', () => {
+            const isBlind = body.getAttribute('data-accessibility') === 'blind';
+            if(isBlind) {
+                body.removeAttribute('data-accessibility');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            } else {
+                body.setAttribute('data-accessibility', 'blind');
+                accessBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            }
+        });
+
+        // --- 2. FORM HANDLING (MAILTO GENERATOR) ---
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get values
+            const type = document.getElementById('reportType').value;
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const details = document.getElementById('userDetails').value;
+
+            // Construct Email Components
+            const destination = "info@engcalc.app";
+            const subject = `[EngCalc Report] - ${type}`;
+            
+            // Create a readable body for the email
+            const bodyMessage = `Type: ${type}%0D%0A` + 
+                                `Name: ${name}%0D%0A` + 
+                                `Contact Email: ${email}%0D%0A` + 
+                                `--------------------------------%0D%0A` + 
+                                `Details:%0D%0A${details}`;
+
+            // Open User's Email Client
+            window.location.href = `mailto:${destination}?subject=${encodeURIComponent(subject)}&body=${bodyMessage}`;
+            
+            // Optional: Alert user
+            alert("This will open your email client to send the report directly to us.");
+        });
+    </script>
+</body>
+</html>
