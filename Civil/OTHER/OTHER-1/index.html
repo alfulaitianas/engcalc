@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Average Gradient Info | EngCalc.app</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- 1. VARIABLES & THEMES --- */
+        :root {
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #0f172a;   
+            --text-muted: #475569;
+            --brand-navy: #0f172a; 
+            --brand-blue: #2563eb; 
+            --brand-blue-light: rgba(37, 99, 235, 0.1);
+            --border-color: #e2e8f0;
+            --logo-text: #000000;
+            --logo-dot: #2563eb;
+            --grid-color: rgba(15, 23, 42, 0.05);
+            --status-success-bg: #dcfce7;
+            --status-success-text: #166534;
+            --badge-bg: #e2e8f0;
+            --badge-text: #475569;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #020617;        
+            --bg-surface: #0f172a; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --brand-navy: #ffffff;
+            --brand-blue: #60a5fa;
+            --brand-blue-light: rgba(96, 165, 250, 0.15);
+            --border-color: #1e293b;
+            --logo-text: #ffffff;
+            --logo-dot: #60a5fa;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --status-success-bg: #064e3b; 
+            --status-success-text: #6ee7b7;
+            --badge-bg: #1e293b;
+            --badge-text: #94a3b8;
+        }
+
+        [data-accessibility="blind"] {
+            --bg-body: #ffffff !important;
+            --bg-surface: #ffffff !important;
+            --text-main: #000000 !important;
+            --text-muted: #000000 !important;
+            --brand-navy: #000000 !important;
+            --brand-blue: #000000 !important;
+            --border-color: #000000 !important;
+            --logo-text: #000000 !important;
+            --logo-dot: #000000 !important;
+            --grid-color: transparent !important;
+            --status-success-bg: #ffffff !important;
+            --status-success-text: #000000 !important;
+            --badge-bg: #ffffff !important;
+            --badge-text: #000000 !important;
+        }
+
+        /* --- 2. RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { transition: background-color 0s, color 0s, border-color 0s; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+        /* --- 3. NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+        [data-theme="dark"] nav { background: rgba(2, 6, 23, 0.7); }
+        [data-accessibility="blind"] nav { background: white; border-bottom: 3px solid black; backdrop-filter: none; }
+
+        .nav-group { display: flex; align-items: center; gap: 3rem; }
+        .logo { font-family: 'Cairo Play', sans-serif; font-size: 1.6rem; font-weight: 700; display: flex; align-items: baseline; }
+        .logo-main { color: var(--logo-text); }
+        .logo-app { color: var(--logo-dot); }
+
+        .back-link { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
+        .back-link:hover { color: var(--brand-blue); }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* --- NEW CONTACT BUTTON STYLE --- */
+        .btn-nav-contact {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--brand-navy);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            margin-right: 0.5rem; /* Space between button and toggles */
+            background: var(--bg-surface);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-contact:hover {
+            background: var(--brand-blue);
+            color: white;
+            border-color: var(--brand-blue);
+            transform: translateY(-2px);
+        }
+
+        [data-accessibility="blind"] .btn-nav-contact { 
+            border: 2px solid black; 
+            background: white; 
+            color: black;
+            text-decoration: underline;
+        }
+
+        .icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border-color); color: var(--text-main); display: flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background-color: var(--brand-blue); color: white; border-color: var(--brand-blue); }
+
+        /* --- 4. MAIN LAYOUT --- */
+        main {
+            padding: 8rem 5% 4rem; 
+            max-width: 1000px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+        }
+
+        .content-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            position: relative;
+        }
+        [data-accessibility="blind"] .content-card { border: 3px solid black; background: white; }
+
+        /* --- 5. CONTENT STYLING --- */
+        .page-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+        
+        .badges-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .badge { font-size: 0.75rem; background: var(--badge-bg); color: var(--badge-text); padding: 4px 10px; border-radius: 6px; font-weight: 600; }
+        .badge-success { background-color: var(--status-success-bg); color: var(--status-success-text); }
+        [data-accessibility="blind"] .badge { border: 1px solid black; background: white; color: black; }
+
+        h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); color: var(--brand-navy); font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        .citation { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
+
+        h2 { font-size: 1.4rem; color: var(--brand-navy); margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        h2::before { content: ''; display: block; width: 6px; height: 24px; background: var(--brand-blue); border-radius: 3px; }
+
+        p, li { line-height: 1.7; color: var(--text-main); margin-bottom: 1rem; font-size: 1.05rem; }
+        ul { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+
+        /* --- 6. MATH & TABLES --- */
+        .math-block {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        mjx-container, .MathJax { color: var(--text-main) !important; }
+        [data-accessibility="blind"] .math-block { border: 2px solid black; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
+        th { font-weight: 700; color: var(--brand-navy); background: var(--bg-body); }
+        td { color: var(--text-main); }
+        [data-accessibility="blind"] th, [data-accessibility="blind"] td { border: 1px solid black; color: black; }
+
+        /* --- 7. FOOTER & ACTIONS --- */
+        footer { border-top: 1px solid var(--border-color); text-align: center; background: var(--bg-body); padding: 4rem 5%; margin-top: auto; }
+        .footer-logo { margin-bottom: 1rem; justify-content: center; }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+
+        .action-area { margin-top: 3rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        
+        .btn-large {
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 1rem 2rem; background: var(--brand-blue); color: white;
+            border-radius: 50px; font-weight: 700; font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        .btn-large:hover { opacity: 0.9; }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-main);
+        }
+        .btn-secondary:hover {
+            border-color: var(--brand-blue);
+            color: var(--brand-blue);
+        }
+
+        [data-accessibility="blind"] .btn-large { background: white; color: black; border: 3px solid black; font-weight: 900; }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            main { padding-top: 6rem; padding-left: 1rem; padding-right: 1rem; }
+            .content-card { padding: 1.5rem; }
+            .action-area { flex-direction: column; }
+        }
+        
+        @media (max-width: 480px) {
+            .btn-nav-contact { display: none; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav>
+        <div class="nav-group">
+            <a href="https://www.engcalc.app" class="logo">
+                <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+            </a>
+            <a href="https://www.engcalc.app/Civil/OTHER" class="back-link"><i class="fa-solid fa-arrow-left"></i> Hub</a>
+        </div>
+
+        <div class="nav-actions">
+            <a href="https://www.engcalc.app/report" class="btn-nav-contact">Contact Us</a>
+
+            <button class="icon-btn" id="themeToggle" aria-label="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="accessToggle" aria-label="Toggle Accessibility Mode"><i class="fa-solid fa-eye"></i></button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="content-card" id="pdf-content">
+            
+            <div class="page-header">
+                <div class="badges-row">
+                    <span class="badge">ID: OTHER-1</span>
+                    <span class="badge">Method: Standard Geometry</span>
+                    <span class="badge">Author: Anas Al Fulaiti</span>
+                    <span class="badge badge-success"><i class="fa-solid fa-check"></i> Checked by: James W. (12/JAN/2026)</span>
+                </div>
+                <h1>Average Gradient & Slope</h1>
+                <p class="citation">Reference: Not needed, as this is a general overview of Surveying Principles and Coordinate Geometry.</p>
+            </div>
+
+            <p>The average gradient calculator determines the steepness of a slope, often known as the grade. This is defined by the relationship between the vertical change (Rise) and the horizontal distance (Run) between two points.</p>
+
+            <h2>1. Calculating Slope Gradient</h2>
+            <p>To calculate the slope gradient, you divide the change in vertical height by the change in horizontal distance. The fundamental formula is:</p>
+
+            <div class="math-block">
+                $$ \text{Gradient} = \frac{\text{Rise}}{\text{Run}} = \frac{\Delta y}{\Delta x} $$
+            </div>
+
+            <p>Where:</p>
+            <ul>
+                <li>$\text{Rise}$ = Vertical difference between the highest and lowest points.</li>
+                <li>$\text{Run}$ = Horizontal distance between the points.</li>
+            </ul>
+
+            <h2>2. Calculating Slope Angle</h2>
+            <p>The angle of a slope is commonly expressed in degrees. To find this, you must use the arctangent function on the gradient ratio.</p>
+
+            <div class="math-block">
+                $$ \theta = \arctan\left(\frac{\text{Rise}}{\text{Run}}\right) $$
+            </div>
+            
+            <p>This calculation converts the dimensionless slope ratio into an angle ($\theta$) in degrees.</p>
+
+            <h2>3. How to Calculate the Slope of a Hill</h2>
+            <p>For practical field applications, such as surveying a hill, follow these steps:</p>
+            <ul>
+                <li><strong>Measure Distance:</strong> Measure the horizontal distance (or map distance) between the top and bottom of the hill.</li>
+                <li><strong>Find Altitude Difference:</strong> Using a map or GPS, determine the elevation at both the top and bottom points.</li>
+                <li><strong>Unit Conversion:</strong> Ensure both the distance and altitude measurements are in the same units (e.g., both in meters or both in feet).</li>
+                <li><strong>Calculate:</strong> Divide the difference in altitude by the horizontal distance.</li>
+            </ul>
+            <p><em>Note: This assumes a linear increase. If the slope varies significantly, calculate the gradient for sections where the slope is relatively constant.</em></p>
+
+            <h2>4. The Linear Function ($y = mx + b$)</h2>
+            <p>In mathematics, the "function of a slope" describes the linear relationship between variables, typically denoted as $y = mx + b$.</p>
+
+            <div class="math-block">
+                $$ m = \frac{y_2 - y_1}{x_2 - x_1} $$
+            </div>
+
+            <p>Where:</p>
+            <ul>
+                <li>$y$ = Dependent variable (output)</li>
+                <li>$x$ = Independent variable (input)</li>
+                <li>$m$ = The slope (Rate of change of $y$ with respect to $x$)</li>
+                <li>$b$ = Y-intercept (Value of $y$ when $x$ is 0)</li>
+            </ul>
+
+            <h2>5. Summary of Slope Representations</h2>
+            <p>Slopes can be represented in various formats depending on the industry (Construction, Road Works, Mathematics).</p>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 30%">Representation</th>
+                            <th>Formula / Format</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Gradient Ratio</strong></td>
+                            <td>$ 1 : (\text{Run} \div \text{Rise}) $</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Percentage (%)</strong></td>
+                            <td>$ \displaystyle \left(\frac{\text{Rise}}{\text{Run}}\right) \times 100 $</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Angle (Degrees)</strong></td>
+                            <td>$ \theta = \tan^{-1}\left(\frac{\text{Rise}}{\text{Run}}\right) $</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-area">
+                <a href="https://www.engcalc.app/Civil/OTHER/OTHER-1/calc" class="btn-large">Open Calculator <i class="fa-solid fa-arrow-right"></i></a>
+                <button id="printBtn" class="btn-large btn-secondary">
+                    <i class="fa-solid fa-file-pdf"></i> Download as PDF
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="logo footer-logo">
+            <span class="logo-main">EngCalc</span><span class="logo-app">.app</span>
+        </div>
+        <p class="footer-text">&copy; 2026 EngCalc.app. Built for the Civil Engineering Community.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- 1. THEME & ACCESS TOGGLES ---
+            try {
+                const themeBtn = document.getElementById('themeToggle');
+                const accessBtn = document.getElementById('accessToggle');
+                const body = document.body;
+
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    body.setAttribute('data-theme', savedTheme);
+                    if(themeBtn) themeBtn.innerHTML = savedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+                }
+
+                if (themeBtn) {
+                    themeBtn.addEventListener('click', () => {
+                        const isDark = body.getAttribute('data-theme') === 'dark';
+                        const newTheme = isDark ? 'light' : 'dark';
+                        body.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('theme', newTheme);
+                        themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+                    });
+                }
+
+                if (accessBtn) {
+                    accessBtn.addEventListener('click', () => {
+                        const isBlind = body.getAttribute('data-accessibility') === 'blind';
+                        if(isBlind) {
+                            body.removeAttribute('data-accessibility');
+                            accessBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+                        } else {
+                            body.setAttribute('data-accessibility', 'blind');
+                            accessBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+                        }
+                    });
+                }
+            } catch (e) { console.log("Theme Error: " + e); }
+
+            // --- 2. METHOD 3: POPUP WINDOW ---
+            const printBtn = document.getElementById('printBtn');
+            if (printBtn) {
+                printBtn.addEventListener('click', function() {
+                    // 1. Capture current styles from HEAD
+                    const headContent = document.head.innerHTML;
+                    
+                    // 2. Capture the main content card
+                    const bodyContent = document.getElementById('pdf-content').innerHTML;
+
+                    // 3. Open a new window
+                    const win = window.open('', '', 'height=700,width=900');
+                    
+                    if (win) {
+                        // 4. Write HTML structure to the new window
+                        win.document.write('<html><head>');
+                        win.document.write('<title>Average Gradient Report</title>');
+                        // Inject original styles so it looks identical
+                        win.document.write(headContent);
+                        // Add specific style to hide the buttons in the PDF
+                        win.document.write('<style>body { background: white; margin: 0; padding: 20px; } .content-card { border: none; box-shadow: none; margin: 0 auto; max-width: 800px; } .action-area { display: none !important; } </style>');
+                        win.document.write('</head><body>');
+                        // Add the content
+                        win.document.write('<div class="content-card">');
+                        win.document.write(bodyContent);
+                        win.document.write('</div>');
+                        win.document.write('</body></html>');
+                        
+                        // 5. Finalize and Print
+                        win.document.close();
+                        win.focus();
+                        
+                        // Wait a moment for fonts/MathJax to render, then print
+                        setTimeout(function(){
+                            win.print();
+                        }, 1000);
+                    } else {
+                        alert("Please allow popups for this website to download the PDF.");
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
